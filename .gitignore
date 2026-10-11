@@ -1,0 +1,6 @@
+.venv/
+.venv-1/
+.venv-2/
+__pycache__/
+*.pyc
+Git-2.56.0.2-64-bit.exe
