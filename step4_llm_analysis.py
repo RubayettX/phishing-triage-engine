@@ -14,6 +14,9 @@ from google.genai import types
 from step3_combined_report import build_report
 
 
+# The system prompt tells Gemini HOW to behave for this entire task.
+# Note the explicit defense against prompt injection: we tell it the
+# email content is untrusted data, not instructions to follow.
 SYSTEM_PROMPT = """You are a senior SOC (Security Operations Center) analyst
 performing phishing triage.
 
@@ -36,14 +39,22 @@ Scoring guide: 0-29 CLEAN, 30-69 SUSPICIOUS, 70-100 MALICIOUS."""
 
 
 def build_evidence_text(report):
+    """
+    Turn the Step 3 report (a Python dictionary) into a plain-text
+    block that we can hand to the LLM as its input.
+    """
     headers_text = "\n".join(f"{k}: {v}" for k, v in report["headers"].items())
+
     mismatches_text = "\n".join(f"- {m}" for m in report["sender_mismatches"]) or "(none)"
+
     auth_text = "\n".join(f"{k}: {v}" for k, v in report["auth_results"].items())
+
     domain_text = "\n".join(
         f"- {f['actual_domain']} looks like {f['suspected_brand']} "
         f"(similarity {f['similarity']}, source: {f['source']})"
         for f in report["domain_findings"]
     ) or "(none)"
+
     urls_text = "\n".join(f"- {u}" for u in report["urls"]) or "(none)"
 
     return f"""<evidence>
@@ -70,9 +81,13 @@ Give your triage verdict as JSON."""
 
 
 def analyze_with_gemini(report, api_key, model="gemini-flash-latest"):
+    """
+    Send the evidence to Gemini and return the parsed JSON verdict
+    as a Python dictionary.
+    """
     client = genai.Client(api_key=api_key)
-
     last_error = None
+
     for attempt in range(3):
         try:
             response = client.models.generate_content(
@@ -87,6 +102,11 @@ def analyze_with_gemini(report, api_key, model="gemini-flash-latest"):
             return json.loads(response.text)
         except Exception as e:
             last_error = e
+            # Don't waste retries on a quota error - waiting a few
+            # seconds won't fix "you used up today's free-tier limit"
+            if "RESOURCE_EXHAUSTED" in str(e) or "429" in str(e):
+                print("  Daily API quota exhausted - skipping retries for this email.")
+                break
             wait_seconds = 5 * (attempt + 1)
             print(f"Attempt {attempt + 1} failed ({e}). Retrying in {wait_seconds}s...")
             time.sleep(wait_seconds)
@@ -95,9 +115,12 @@ def analyze_with_gemini(report, api_key, model="gemini-flash-latest"):
 
 
 if __name__ == "__main__":
+    # Read the API key from an environment variable, NOT hardcoded here.
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         print("ERROR: Set the GEMINI_API_KEY environment variable first.")
+        print("  Windows (PowerShell):  $env:GEMINI_API_KEY = 'your-key-here'")
+        print("  Mac/Linux:             export GEMINI_API_KEY='your-key-here'")
         raise SystemExit(1)
 
     sample_email = """From: "PayPal Support" <security@paypa1-alerts.com>
