@@ -23,7 +23,7 @@ def run():
         print("ERROR: Set the GEMINI_API_KEY environment variable first.")
         raise SystemExit(1)
 
-    samples = all_samples()[:5]  # TEMP: testing with 5 samples first
+    samples = all_samples()
     results = []
 
     print(f"Running benchmark on {len(samples)} labeled emails...\n")
