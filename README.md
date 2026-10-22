@@ -100,6 +100,8 @@ A web UI (Streamlit) was attempted but shelved due to an unresolved hosting issu
 
 Planned enhancements: validation against real-world phishing datasets (e.g. SpamAssassin corpus, Nazario corpus) in addition to the synthetic benchmark, multi-tenant SOC-analyst login with per-company data isolation, and threat-intel lookups (VirusTotal/URLhaus).
 
+**Scope note:** This is a focused prototype demonstrating the core detection and triage logic — not a production-ready SOC tool. Features like multi-tenant access control, enterprise logging, and third-party threat-intel integration are deliberately out of scope for now; building those properly would require a team and a much longer timeline than a solo portfolio project allows.
+
 ## Author
 
 Khan Rubayet Islam — Computer Science (Cybersecurity) student, Taylor's University
