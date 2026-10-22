@@ -65,6 +65,12 @@ Given a PayPal-impersonation phishing email with a typosquatted sender domain an
 }
 ```
 
+## Benchmark Results
+
+![Benchmark results](benchmark_results.png)
+
+19 of 20 labeled emails evaluated (1 skipped due to Gemini's free-tier daily quota limit) — 100% precision, recall, F1, and accuracy.
+
 ## Tech stack
 
 - Python 3.12
@@ -88,11 +94,11 @@ The system can process any number of emails sequentially — the Gemini API call
 
 Core pipeline (parsing → domain checks → LLM verdict) is complete and tested against sample phishing emails.
 
-A labeled 20-email benchmark (10 phishing, 10 legitimate, shuffled to avoid pattern bias) has been built in `benchmark_dataset.py` / `run_benchmark.py`. A partial run against it achieved 100% precision, recall, and F1 before hitting Gemini's free-tier daily request limit; a full clean run is pending API quota availability.
+A labeled 20-email benchmark (10 phishing, 10 legitimate, shuffled to avoid pattern bias) has been built in `benchmark_dataset.py` / `run_benchmark.py`. 19 of 20 emails were evaluated before hitting Gemini's free-tier daily quota, achieving 100% precision, recall, and F1 (see Benchmark Results above).
 
 A web UI (Streamlit) was attempted but shelved due to an unresolved hosting issue; a terminal-based demo is the current primary way to see the system run.
 
-Planned enhancements: multi-tenant SOC-analyst login with per-company data isolation, threat-intel lookups (VirusTotal/URLhaus), and a larger real-world benchmark dataset.
+Planned enhancements: validation against real-world phishing datasets (e.g. SpamAssassin corpus, Nazario corpus) in addition to the synthetic benchmark, multi-tenant SOC-analyst login with per-company data isolation, and threat-intel lookups (VirusTotal/URLhaus).
 
 ## Author
 

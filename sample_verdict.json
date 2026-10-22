@@ -1,0 +1,6 @@
+{
+  "verdict": "MALICIOUS",
+  "risk_score": 98,
+  "summary": "Email impersonates PayPal using a typosquatted domain (paypa1-alerts.com) with failed SPF, DKIM, and DMARC authentication.",
+  "soc_recommendation": "Block sender domain, quarantine similar emails, and advise the recipient to reset their PayPal credentials via the official site."
+}
